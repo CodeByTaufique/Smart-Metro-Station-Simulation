@@ -71,6 +71,20 @@ OpenGL and GLUT are provided by the system frameworks.
 sudo apt install freeglut3-dev libglfw3-dev libglew-dev
 ```
 
+### 🪟 Windows
+
+The easiest path on Windows is **vcpkg** (works with Visual Studio or CLion):
+
+```powershell
+vcpkg install freeglut glfw3 glew
+```
+
+Alternatively, install **MSYS2 / MinGW-w64** and pull the packages from there:
+
+```bash
+pacman -S mingw-w64-x86_64-freeglut mingw-w64-x86_64-glfw mingw-w64-x86_64-glew
+```
+
 ---
 
 ## 🏗️ Building
@@ -89,9 +103,14 @@ clang++ -std=c++17 Metro.cpp -o Metro \
 g++ -std=c++17 Metro.cpp -o Metro -lGL -lGLU -lglut -lglfw -lGLEW
 ```
 
+**Windows (MSYS2/MinGW-w64 terminal):**
+```bash
+g++ -std=c++17 Metro.cpp -o Metro.exe -lfreeglut -lopengl32 -lglu32 -lglfw3 -lglew32
+```
+
 ### Option B — CMake
 
-If you're using CLion or prefer CMake, create a `CMakeLists.txt` alongside `Metro.cpp`:
+If you're using CLion, Visual Studio, or prefer CMake on any platform, create a `CMakeLists.txt` alongside `Metro.cpp`:
 
 ```cmake
 cmake_minimum_required(VERSION 3.16)
@@ -114,12 +133,25 @@ cmake ..
 cmake --build .
 ```
 
+> **Windows + Visual Studio note:** if you installed dependencies via **vcpkg**, pass its toolchain file when configuring so `find_package` can locate GLUT/GLFW:
+> ```powershell
+> cmake .. -DCMAKE_TOOLCHAIN_FILE=[path-to-vcpkg]/scripts/buildsystems/vcpkg.cmake
+> cmake --build .
+> ```
+> This produces `Metro.exe`, which can also be opened and run directly from within Visual Studio or CLion.
+
 ---
 
 ## ▶️ Running
 
+**macOS / Linux:**
 ```bash
 ./Metro
+```
+
+**Windows:**
+```powershell
+Metro.exe
 ```
 
 A window titled **"Smart Metro Rail Station Simulation | CG Lab Project"** will open. Use the keyboard controls above to interact with the station. 🎉
