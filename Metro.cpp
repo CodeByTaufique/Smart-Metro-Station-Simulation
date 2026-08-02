@@ -1223,8 +1223,7 @@ void initGL() {
     srand((unsigned) time(nullptr));
 
     initClouds();
-    initRain();
-    initPassengers();
+ 
     initBirds();
 
     currentPalette = paletteForMode(activeLightMode);
