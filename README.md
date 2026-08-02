@@ -335,3 +335,11 @@ This project was developed as a **Computer Graphics (CG) Lab** course project, d
 *Built with 🚆 for learning, and 🖥️ in pure OpenGL.*
 
 </div>
+
+## 👤 Author
+
+**Taufique Hassan**
+
+> 🚆 Designed with algorithms.  
+> 🎨 Brought to life with graphics.  
+> 💻 Built with C++ & OpenGL.
