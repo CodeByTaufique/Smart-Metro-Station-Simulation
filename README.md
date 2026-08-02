@@ -1,29 +1,141 @@
+<div align="center">
+
 # 🚇 Smart Metro Rail Station Simulation
 
-An interactive 2D Computer Graphics simulation of a modern metro rail station, built in **C++** with **OpenGL / GLUT / GLFW**. The project models realistic train arrival and departure, platform screen doors, passenger movement, a working elevator and escalator, dynamic day/evening/night lighting, and live weather effects — all driven by fundamental 2D graphics algorithms and a keyboard-controlled simulation loop.
+### An Interactive 2D Computer Graphics Simulation of a Modern Metro Station
+
+[![C++](https://img.shields.io/badge/C%2B%2B-17-00599C?style=for-the-badge&logo=cplusplus&logoColor=white)](https://en.cppreference.com/w/cpp/17)
+[![OpenGL](https://img.shields.io/badge/OpenGL-Legacy%20%2F%20Immediate%20Mode-5586A4?style=for-the-badge&logo=opengl&logoColor=white)](https://www.opengl.org/)
+[![GLUT](https://img.shields.io/badge/GLUT-FreeGLUT-orange?style=for-the-badge)]()
+[![Platform](https://img.shields.io/badge/Platform-macOS%20%7C%20Linux%20%7C%20Windows-blue?style=for-the-badge)]()
+[![Status](https://img.shields.io/badge/Status-Active-success?style=for-the-badge)]()
+
+*A fully interactive metro station — trains, platform screen doors, an elevator, an escalator, weather, and a full day/night cycle — rendered entirely with fundamental 2D graphics algorithms and a keyboard-driven simulation loop.*
+
+</div>
+
+---
+
+## 📑 Table of Contents
+
+- [📖 Overview](#-overview)
+- [🏗 System Architecture](#-system-architecture)
+- [✨ Features](#-features)
+- [🎮 Controls](#-controls)
+- [🧰 Requirements](#-requirements)
+- [🏗️ Building](#️-building)
+- [▶️ Running](#️-running)
+- [🗂️ Project Structure](#️-project-structure-single-file-layout)
+- [📝 Notes](#-notes)
+- [🎓 Academic Context](#-academic-context)
 
 ---
 
 ## 📖 Overview
 
-The simulation renders a full metro station scene: railway tracks, an elevated platform with safety doors, a ticket counter and gates, a waiting area, an elevator shaft, an escalator, station signage, a signal system, and a live HUD. A train can be dispatched, brought to a stop, and its doors opened and closed — with the platform's own screen doors and the passenger crowd responding to that state in real time, alongside a full day/night lighting cycle and rain/fog weather effects.
+The simulation renders a complete metro station scene: railway tracks, an elevated platform with safety doors, a ticket counter and gates, a waiting area, an elevator shaft, an escalator, station signage, a signal system, and a live HUD. A train can be dispatched, brought to a stop, and have its doors opened and closed — with the platform's own screen doors and the passenger crowd responding to that state in real time, all set against a full day/night lighting cycle and rain/fog weather effects.
+
+---
+
+## 🏗 System Architecture
+
+The entire scene is a single fixed-tick simulation loop: every ~30ms, state is advanced (`timerFunc`) and the frame is repainted (`display`) in strict back-to-front layer order, so later draw calls visually occlude earlier ones.
+
+```mermaid
+flowchart LR
+    K["⌨️ Keyboard Input"] --> S["⚙️ Simulation State Machine<br/>Train · Doors · Signal · Weather · Lighting"]
+    S --> T["🚆 Train State<br/>ARRIVING → STOPPED → DOORS_OPEN → DEPARTING"]
+    S --> P["🚪 Platform Screen Doors<br/>synced to doorOpenAmount"]
+    S --> L["🛗 Elevator State<br/>MOVING → DOORS_OPENING → DOORS_OPEN → DOORS_CLOSING"]
+    T --> R["🖼️ Render Pipeline<br/>Passengers → Doors → Train → Weather → HUD"]
+    P --> R
+    L --> R
+    R --> W["🪟 GLUT Window"]
+```
+
+| Layer | Implementation |
+|---|---|
+| 🖼️ **Rendering** | Legacy/immediate-mode OpenGL (`glBegin`/`glEnd`) via GLUT |
+| ⚙️ **Simulation** | A tick-based state machine (`glutTimerFunc`) driving trains, doors, elevator, weather, and lighting |
+| ⌨️ **Input** | GLUT keyboard callback mapping single keys to state transitions |
+| 📐 **Graphics core** | Hand-implemented DDA, Bresenham, and Midpoint Circle algorithms, plus 2D transformations |
 
 ---
 
 ## ✨ Features
 
-- 🚆 **Train operations** — arrival, braking, stopping, door open/close cycle, departure, and emergency stop
-- 🚪 **Platform Screen Doors (safety system)** — glass barrier doors along the safety line that only unlock in sync with the train's own doors, preventing passengers from crossing to the track edge at any other time
-- 🚶 **Passenger simulation** — queuing, boarding, exiting, and idle waiting passengers with simple animated movement
-- 🛗 **Elevator** — a lift car that travels between the surface (ground level) and the platform, stopping at each floor to open its doors, dwell, and close again before reversing direction
-- 🔼 **Escalator** — continuously animated step motion between levels
-- 🌗 **Dynamic lighting** — Day / Evening / Night lighting modes with smooth transitions, sun/moon, and station lamp glow
-- 🌧️ **Weather effects** — toggleable light rain, heavy rain, and fog, with wet-surface reflections
-- 🚦 **Signal system** — automatic or manual signal control tied to train state
-- 🏢 **Station infrastructure** — ticket counter, ticket gates, benches, waiting shelter, signboards, digital and analog clocks
-- 🖥️ **HUD** — live announcements, on-screen console/diagnostics readout, and a controls reference panel
-- 🎥 **Multiple camera views** — cycle between preset viewing angles
-- 📐 **Core Computer Graphics techniques** — DDA Line Algorithm, Bresenham Line Algorithm, Midpoint Circle Algorithm, 2D geometric transformations (translation, scaling), the RGB color model, and frame-by-frame animation
+<table>
+<tr>
+<td width="50%" valign="top">
+
+### 🚆 Train Operations
+- Arrival, braking, stopping, and departure
+- Full door open/close animation cycle
+- Emergency stop override
+
+</td>
+<td width="50%" valign="top">
+
+### 🚪 Platform Screen Doors *(Safety System)*
+- Glass barrier doors along the safety line
+- Unlock **only** in sync with the train's own doors
+- Passengers cannot reach the track edge otherwise
+
+</td>
+</tr>
+<tr>
+<td width="50%" valign="top">
+
+### 🚶 Passenger Simulation
+- Queuing, boarding, exiting, and idle waiting
+- Simple animated crowd movement
+- Boarding gated by the same safety rule as the doors
+
+</td>
+<td width="50%" valign="top">
+
+### 🛗 Elevator & 🔼 Escalator
+- Lift car cycles between surface and platform
+- Opens doors, dwells, and closes at each stop
+- Continuously animated escalator step motion
+
+</td>
+</tr>
+<tr>
+<td width="50%" valign="top">
+
+### 🌗 Dynamic Lighting
+- Day / Evening / Night modes with smooth transitions
+- Animated sun/moon and station lamp glow
+
+</td>
+<td width="50%" valign="top">
+
+### 🌧️ Weather Effects
+- Toggleable light rain, heavy rain, and fog
+- Wet-surface reflections
+
+</td>
+</tr>
+<tr>
+<td width="50%" valign="top">
+
+### 🚦 Signal System
+- Automatic or manual signal control
+- Tied directly to live train state
+
+</td>
+<td width="50%" valign="top">
+
+### 🏢 Station Infrastructure
+- Ticket counter, gates, benches, waiting shelter
+- Signboards, digital and analog clocks
+
+</td>
+</tr>
+</table>
+
+**Also included:** 🖥️ a live HUD (announcements + on-screen diagnostics), 🎥 multiple cycling camera views, and the full set of 📐 **core Computer Graphics techniques** — DDA Line Algorithm, Bresenham Line Algorithm, Midpoint Circle Algorithm, 2D geometric transformations (translation, scaling), the RGB color model, and frame-by-frame animation.
 
 ---
 
@@ -47,66 +159,85 @@ The simulation renders a full metro station scene: railway tracks, an elevated p
 | `V` | 🎥 Cycle camera view |
 | `Esc` | 🚪 Exit |
 
-The full control list is also shown in-app via the bottom-left controls panel.
+> 💡 The full control list is also shown in-app via the bottom-left controls panel.
 
 ---
 
 ## 🧰 Requirements
 
-- A C++17-capable compiler (e.g. `g++`, `clang++`)
+- A C++17-capable compiler (`g++` or `clang++`)
 - OpenGL
 - GLUT (or FreeGLUT)
-- GLFW (optional — the project also compiles against system GLUT alone)
+- GLFW *(optional — the project also compiles against system GLUT alone)*
 
-### 🍎 macOS
+<table>
+<tr>
+<td valign="top">
 
+**🍎 macOS**
 ```bash
 brew install glfw glew
 ```
-OpenGL and GLUT are provided by the system frameworks.
+*(OpenGL and GLUT are provided by system frameworks)*
 
-### 🐧 Linux (Debian/Ubuntu)
+</td>
+<td valign="top">
 
+**🐧 Linux (Debian/Ubuntu)**
 ```bash
-sudo apt install freeglut3-dev libglfw3-dev libglew-dev
+sudo apt install freeglut3-dev \
+    libglfw3-dev libglew-dev
 ```
 
-### 🪟 Windows
+</td>
+<td valign="top">
 
-The easiest path on Windows is **vcpkg** (works with Visual Studio or CLion):
-
+**🪟 Windows**
 ```powershell
 vcpkg install freeglut glfw3 glew
 ```
+*(or MSYS2/MinGW-w64 — see below)*
 
-Alternatively, install **MSYS2 / MinGW-w64** and pull the packages from there:
-
-```bash
-pacman -S mingw-w64-x86_64-freeglut mingw-w64-x86_64-glfw mingw-w64-x86_64-glew
-```
+</td>
+</tr>
+</table>
 
 ---
 
 ## 🏗️ Building
 
-### Option A — Direct compile
+### Option A — Direct Compile
 
-**macOS:**
+<table>
+<tr><td>
+
+**macOS**
 ```bash
 clang++ -std=c++17 Metro.cpp -o Metro \
     -framework OpenGL -framework GLUT -framework Cocoa \
     -I/opt/homebrew/include -L/opt/homebrew/lib -lglfw -lGLEW
 ```
 
-**Linux:**
+</td></tr>
+<tr><td>
+
+**Linux**
 ```bash
-g++ -std=c++17 Metro.cpp -o Metro -lGL -lGLU -lglut -lglfw -lGLEW
+g++ -std=c++17 Metro.cpp -o Metro \
+    -lGL -lGLU -lglut -lglfw -lGLEW
 ```
 
-**Windows (MSYS2/MinGW-w64 terminal):**
+</td></tr>
+<tr><td>
+
+**Windows** *(MSYS2/MinGW-w64 terminal)*
 ```bash
-g++ -std=c++17 Metro.cpp -o Metro.exe -lfreeglut -lopengl32 -lglu32 -lglfw3 -lglew32
+g++ -std=c++17 Metro.cpp -o Metro.exe \
+    -lfreeglut -lopengl32 -lglu32 -lglfw3 -lglew32
 ```
+
+</td></tr>
+</table>
 
 ### Option B — CMake
 
@@ -133,7 +264,7 @@ cmake ..
 cmake --build .
 ```
 
-> **Windows + Visual Studio note:** if you installed dependencies via **vcpkg**, pass its toolchain file when configuring so `find_package` can locate GLUT/GLFW:
+> 🪟 **Windows + Visual Studio note:** if you installed dependencies via **vcpkg**, pass its toolchain file when configuring so `find_package` can locate GLUT/GLFW:
 > ```powershell
 > cmake .. -DCMAKE_TOOLCHAIN_FILE=[path-to-vcpkg]/scripts/buildsystems/vcpkg.cmake
 > cmake --build .
@@ -144,15 +275,26 @@ cmake --build .
 
 ## ▶️ Running
 
-**macOS / Linux:**
+<table>
+<tr>
+<td valign="top">
+
+**macOS / Linux**
 ```bash
 ./Metro
 ```
 
-**Windows:**
+</td>
+<td valign="top">
+
+**Windows**
 ```powershell
 Metro.exe
 ```
+
+</td>
+</tr>
+</table>
 
 A window titled **"Smart Metro Rail Station Simulation | CG Lab Project"** will open. Use the keyboard controls above to interact with the station. 🎉
 
@@ -162,36 +304,34 @@ A window titled **"Smart Metro Rail Station Simulation | CG Lab Project"** will 
 
 `Metro.cpp` is organized into clearly labeled sections:
 
-1. 🔧 Global Constants
-2. 🏷️ Enumerations
-3. 🧱 Data Structures
-4. 🌐 Global Simulation State
-5. 📋 Function Prototypes
-6. 📐 Core Graphics Algorithms
-7. 🔄 2D Geometric Transformations
-8. 💡 Lighting Palette System
-9. 🌳 Environment
-10. 🐦 Optional Enhancements — Birds, Wind & Multi-Station
-11. 🏢 Metro Infrastructure
-12. 🚆 Metro Train
-13. 🚶 Human Elements
-14. 🌧️ Weather Effects
-15. 🖥️ Heads-Up Display
-16. ⚙️ Simulation State Machine
-17. 🎥 Camera / Projection
-18. ⌨️ Keyboard Input Handling
-19. 🔁 GLUT Callbacks
-20. 🚀 Program Entry Point
+| # | Section | # | Section |
+|---|---|---|---|
+| 1 | 🔧 Global Constants | 11 | 🏢 Metro Infrastructure |
+| 2 | 🏷️ Enumerations | 12 | 🚆 Metro Train |
+| 3 | 🧱 Data Structures | 13 | 🚶 Human Elements |
+| 4 | 🌐 Global Simulation State | 14 | 🌧️ Weather Effects |
+| 5 | 📋 Function Prototypes | 15 | 🖥️ Heads-Up Display |
+| 6 | 📐 Core Graphics Algorithms | 16 | ⚙️ Simulation State Machine |
+| 7 | 🔄 2D Geometric Transformations | 17 | 🎥 Camera / Projection |
+| 8 | 💡 Lighting Palette System | 18 | ⌨️ Keyboard Input Handling |
+| 9 | 🌳 Environment | 19 | 🔁 GLUT Callbacks |
+| 10 | 🐦 Optional Enhancements *(Birds, Wind, Multi-Station)* | 20 | 🚀 Program Entry Point |
 
 ---
 
 ## 📝 Notes
 
-- Legacy OpenGL (`glBegin`/`glEnd`, immediate mode) is used throughout for simplicity and compatibility with GLUT — this produces deprecation warnings on macOS but does not affect functionality.
-- All animation (train, doors, elevator, escalator, weather, lighting transitions) is advanced on a fixed simulation tick via `glutTimerFunc`.
+- ⚠️ Legacy OpenGL (`glBegin`/`glEnd`, immediate mode) is used throughout for simplicity and GLUT compatibility — this produces deprecation warnings on macOS but does not affect functionality.
+- ⏱️ All animation (train, doors, elevator, escalator, weather, lighting transitions) is advanced on a fixed simulation tick via `glutTimerFunc`.
 
 ---
 
 ## 🎓 Academic Context
 
-This project was developed as a Computer Graphics (CG) Lab course project, demonstrating the practical application of 2D rendering algorithms, geometric transformations, and interactive animation in a real-world-inspired transportation simulation.
+<div align="center">
+
+This project was developed as a **Computer Graphics (CG) Lab** course project, demonstrating the practical application of 2D rendering algorithms, geometric transformations, and interactive animation in a real-world-inspired transportation simulation.
+
+*Built with 🚆 for learning, and 🖥️ in pure OpenGL.*
+
+</div>
