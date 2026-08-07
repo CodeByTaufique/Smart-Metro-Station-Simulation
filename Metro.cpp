@@ -2320,7 +2320,7 @@ void display() {
     drawWaitingArea();
     drawBenches();
     drawTicketCounter();
-    /*drawTicketGates();
+    drawTicketGates();
     //drawEscalator();
     drawPlatformSignboards();
     drawDigitalWatch();
@@ -2346,7 +2346,7 @@ void display() {
     applyDefaultProjection();
     drawHUD();
     drawControlsPanel();
-    drawSpeedGauge();*/
+    drawSpeedGauge();
 
     glutSwapBuffers();
 }
